@@ -66,6 +66,7 @@ def main(argv):
 
     options, args = setup_args() 
     parameters = {}
+    proxies = {}
     headers = {
         "accept":"application/json",
         "Content-Type":"application/x-www-form-urlencoded",
@@ -86,7 +87,7 @@ def main(argv):
         for result in results:
             if result["file_type"] == options.filetype:
                 print("[*] Downloading sample... " + result["md5_hash"])
-                download_sample(result["urlhaus_download"],options.directory, result["sha256_hash"],".zip")
+                download_sample(result["urlhaus_download"],options.directory, result["sha256_hash"],".zip", proxies)
 
                 download_count = download_count + 1
 
@@ -97,7 +98,6 @@ def main(argv):
     elif options.query == "urls":
 
             dl_urls = []
-            proxies = {}
 
             resp = requests.get(api_base_url + urls_url, headers=headers)
             results = json.loads(resp.text)

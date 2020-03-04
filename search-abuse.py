@@ -45,6 +45,10 @@ def setup_args():
     action="store", dest="proxies",
     help="Proxy for HTTP requests for downloading malware. Note, this is not for the initial request to Abuse.CH. Format is protocol|server,protocol|server...", default="")
 
+    parser.add_option('-v', '--verbose',
+    action="store", dest="verbose",
+    help="Print results of key aspects of the script, such as total results found, number downloaded, et cetera", default="n") 
+
     return parser.parse_args()
 
 def download_sample(download_url, save_directory, save_name, save_extension, proxies):

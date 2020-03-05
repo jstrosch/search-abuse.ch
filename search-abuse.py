@@ -4,7 +4,7 @@ __author__ = "Josh Stroschein"
 __version__ = "0.0.1"
 __maintainer__ = "Josh Stroschein"
 
-import sys, os, optparse, datetime, json, time, random, requests
+import sys, os, optparse, datetime, json, time, random, requests, zipfile
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 #ignore TLS cert errors
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -48,6 +48,10 @@ def setup_args():
     parser.add_option('-v', '--verbose',
     action="store", dest="verbose",
     help="Print results of key aspects of the script, such as total results found, number downloaded, et cetera", default="n") 
+    
+    parser.add_option('-z', '--zipdir',
+    action="store", dest="zipdir",
+    help="Location to extract zip files to - default downloads from Abuse.ch returns zipped files w/o password", default="") 
 
     return parser.parse_args()
 
@@ -97,7 +101,16 @@ def main(argv):
 
                 if download_count >= int(options.limit):
                     print("[!] Download limit reached")
-                    break 
+                    break
+
+        if options.zipdir:
+            for f in os.listdir(options.directory):
+                try:
+                    #print("[*] Unzipping... " + f)
+                    with zipfile.ZipFile(options.directory + "/" +f) as zip_ref:
+                        zip_ref.extractall(options.zipdir)
+                except:
+                    print("[!] problem with this zip file :( - " + f)
 
     elif options.query == "urls":
 

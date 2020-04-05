@@ -16,6 +16,7 @@ user_agent = "Abuse.CH Research"
 payloads_url = "payloads/recent/"
 urls_url = "urls/recent/"
 download_url = "overview/"
+urls_tags = "tag/"
 
 def setup_args():
 
@@ -52,6 +53,10 @@ def setup_args():
     parser.add_option('-e', '--extract',
     action="store", dest="extract",
     help="Extract the downloaded samples from the zip - default downloads from Abuse.ch returns zipped files w/o password", default="n") 
+
+    parser.add_option('-t', '--tag',
+    action="store", dest="tag",
+    help="Tag to filter URLs", default="")
 
     return parser.parse_args()
 
@@ -162,13 +167,41 @@ def main(argv):
             
             if result["url_status"] in ["online","unknown","offline"] and result["tags"] and "opendir" in result["tags"]:
                 url = result["url"]
-                print("[*] opendir " + result["url_status"] + " at... " + url + " (" + result["threat"].replace("http","hxxp") +")")
+                print("[" + result["date_added"] + "] opendir " + result["url_status"] + " at... " + url.replace("http","hxxp") + " (" + result["threat"] +")")
 
                 opendir_count = opendir_count + 1
 
                 if opendir_count >= int(options.limit):
                     print("[!] OpenDir limit reached")
                     break
+
+    elif options.query == "tag":
+
+        result_cnt = 0
+
+        if not options.tag is "":
+            post_data = {'tag':options.tag}
+            resp = requests.post(api_base_url + urls_tags, data = post_data, headers=headers)
+
+            results = json.loads(resp.text)
+            results = results["urls"]
+
+            if options.shuffle == "y":
+                random.shuffle(results)
+
+            print("[*] Received " + str(len(results)) + " results")
+
+            for result in results:
+                
+                if result["url_status"] in ["online","unknown"]:
+                    url = result["url"]
+                    print("[" + result["dateadded"] + "] " + options.tag + " " + result["url_status"] + " at... " + url.replace("http","hxxp") + " (" + result["threat"] +")")
+
+                    result_cnt = result_cnt + 1
+
+                    if result_cnt >= int(options.limit):
+                        print("[!] OpenDir limit reached")
+                        break
 
     if options.verbose == "y":
         print("[*] Downloaded " + str(download_count) + " samples")

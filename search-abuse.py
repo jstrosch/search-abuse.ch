@@ -49,9 +49,9 @@ def setup_args():
     action="store", dest="verbose",
     help="Print results of key aspects of the script, such as total results found, number downloaded, et cetera", default="n") 
     
-    parser.add_option('-z', '--zipdir',
-    action="store", dest="zipdir",
-    help="Location to extract zip files to - default downloads from Abuse.ch returns zipped files w/o password", default="") 
+    parser.add_option('-e', '--extract',
+    action="store", dest="extract",
+    help="Extract the downloaded samples from the zip - default downloads from Abuse.ch returns zipped files w/o password", default="n") 
 
     return parser.parse_args()
 
@@ -103,14 +103,15 @@ def main(argv):
                     print("[!] Download limit reached")
                     break
 
-        if options.zipdir:
+        if options.extract == "y":
             for f in os.listdir(options.directory):
                 try:
-                    #print("[*] Unzipping... " + f)
-                    with zipfile.ZipFile(options.directory + "/" +f) as zip_ref:
-                        zip_ref.extractall(options.zipdir)
+                    with zipfile.ZipFile(os.path.join(options.directory,f)) as zip_ref:
+                        zip_ref.extractall(options.directory)
                 except:
                     print("[!] problem with this zip file :( - " + f)
+                finally:
+                    os.remove(os.path.join(options.directory,f))
 
     elif options.query == "urls":
 

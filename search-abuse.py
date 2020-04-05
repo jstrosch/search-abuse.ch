@@ -147,6 +147,29 @@ def main(argv):
                         print("[!] Download limit reached")
                         break  
 
+    elif options.query == "opendirs-recent":
+        opendir_count = 0
+        resp = requests.get(api_base_url + urls_url, headers=headers)
+        results = json.loads(resp.text)
+        results = results["urls"]
+
+        if options.shuffle == "y":
+            random.shuffle(results)
+
+        print("[*] Received " + str(len(results)) + " results")
+
+        for result in results:
+            
+            if result["url_status"] in ["online","unknown","offline"] and result["tags"] and "opendir" in result["tags"]:
+                url = result["url"]
+                print("[*] opendir " + result["url_status"] + " at... " + url + " (" + result["threat"].replace("http","hxxp") +")")
+
+                opendir_count = opendir_count + 1
+
+                if opendir_count >= int(options.limit):
+                    print("[!] OpenDir limit reached")
+                    break
+
     if options.verbose == "y":
         print("[*] Downloaded " + str(download_count) + " samples")
 

@@ -24,7 +24,7 @@ def setup_args():
 
     parser.add_option('-q', '--query',
     action="store", dest="query",
-    help="The type of search - payloads, urls", default="payloads")
+    help="The type of search - payloads, urls, opendirs-recent, tag", default="payloads")
 
     parser.add_option('-f', '--filetype',
     action="store", dest="filetype",

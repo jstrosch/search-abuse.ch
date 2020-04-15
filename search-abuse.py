@@ -24,7 +24,7 @@ def setup_args():
 
     parser.add_option('-q', '--query',
     action="store", dest="query",
-    help="The type of search - payloads, urls, opendirs-recent, tag", default="payloads")
+    help="The type of search: payloads, urls, opendirs-recent, tag", default="payloads")
 
     parser.add_option('-f', '--filetype',
     action="store", dest="filetype",
@@ -32,11 +32,11 @@ def setup_args():
 
     parser.add_option('-d', '--directory',
     action="store", dest="directory",
-    help="Location to save the downloaded samples", default="samples")
+    help="Location to save any downloaded samples", default="samples")
 
     parser.add_option('-l', '--limit',
     action="store", dest="limit",
-    help="Limit number of results to download", default=200)
+    help="Limit number of results", default=200)
 
     parser.add_option('-s', '--shuffle',
     action="store", dest="shuffle",
@@ -56,7 +56,11 @@ def setup_args():
 
     parser.add_option('-t', '--tag',
     action="store", dest="tag",
-    help="Tag to filter URLs", default="")
+    help="Tag to filter URLs - only available with query type of tag", default="n")
+
+    parser.add_option('-r', '--retrieve',
+    action="store", dest="retrieve",
+    help="Download samples from URLs returned from TAG query. Note, this will download directly from the source and not Abuse.ch servers.", default="n")
 
     return parser.parse_args()
 
@@ -85,6 +89,8 @@ def main(argv):
         "Content-Type":"application/x-www-form-urlencoded",
         "User-Agent":user_agent
     }
+
+    ext = ".bin"
 
     download_count = 0
 
@@ -139,9 +145,9 @@ def main(argv):
                 if result["url_status"] == "online" and result["threat"] == "malware_download" and (not result["tags"] is None and (options.filetype in result["tags"] and not "zip" in result["tags"])) and not result["url"] in dl_urls:
                     print("[*] Downloading sample from... " + result["url"].replace("http","hxxp"))
 
-                    ext = ".bin"
                     if "zip" in result["tags"]:
                         ext = ".zip"
+
                     download_sample(result["url"],options.directory, result["id"],ext, proxies)
 
                     dl_urls.append(result["url"])
@@ -199,8 +205,13 @@ def main(argv):
 
                     result_cnt = result_cnt + 1
 
+                    if options.retrieve == "y":
+                        print("\t[*] Downloading sample from... ")
+
+                        download_sample(url,options.directory, options.tag + "-" + result["url_id"], ext, proxies)
+  
                     if result_cnt >= int(options.limit):
-                        print("[!] OpenDir limit reached")
+                        print("[!] tag limit reached")
                         break
 
     if options.verbose == "y":
